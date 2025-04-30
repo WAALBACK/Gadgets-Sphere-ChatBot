@@ -1,0 +1,5 @@
+Flask==2.2.5
+pyttsx3==2.90
+SpeechRecognition==3.8.1
+spacy==3.7.2
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0.tar.gz

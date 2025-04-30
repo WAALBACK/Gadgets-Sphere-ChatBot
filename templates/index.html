@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gadget Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+    #chat-box {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .message {
+      margin: 10px 0;
+    }
+    .user { font-weight: bold; color: #2b7cff; }
+    .bot { color: #333; }
+    #user-input { width: 80%; padding: 8px; }
+    button { padding: 8px 12px; margin-left: 5px; }
+  </style>
+</head>
+<body>
+  <div id="chat-box">
+    <h2>Gadget Chatbot</h2>
+    <div id="messages"></div>
+    <input type="text" id="user-input" placeholder="Ask me about a gadget...">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="startListening()">🎤 Speak</button>
+  </div>
+
+  <script>
+    function appendMessage(sender, message) {
+      const messages = document.getElementById('messages');
+      const msg = document.createElement('div');
+      msg.className = 'message';
+      msg.innerHTML = `<span class="${sender}">${sender === 'user' ? 'You' : 'Bot'}:</span> ${message}`;
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+      appendMessage('user', text);
+      input.value = '';
+      fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      })
+      .then(res => res.json())
+      .then(data => {
+        appendMessage('bot', data.response);
+        speakResponse(data.response);
+      });
+    }
+
+    function speakResponse(text) {
+      const synth = window.speechSynthesis;
+      const utter = new SpeechSynthesisUtterance(text);
+      synth.speak(utter);
+    }
+
+    function startListening() {
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("user-input").value = transcript;
+        sendMessage();
+      };
+      recognition.start();
+    }
+  </script>
+</body>
+</html>
